@@ -1,0 +1,22 @@
+# li a1, -50
+# li a2,3
+# div t2,a1,a2 # will give u quotient
+# rem t3,a1,a2
+# ------------------------------------------ LAB_______8
+# lui a1 , 0x001EE
+# li a2, 0x000000D1
+# add a2,a1,a2
+# addi a3,a2,0 # miving the value from a2 to a3 
+# ------------------------------------------
+# .data 
+# num1: .word 10
+# num2: .word 20
+# result: .word 0
+# .text
+# lw a1, num1
+# la a0, num2
+# lw a2 ,0(a0)
+# mul a3 ,a1,a2
+# la a4 ,result
+# sw a3,0(a4)
+# ------------------------------------
