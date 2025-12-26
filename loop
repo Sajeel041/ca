@@ -1,0 +1,73 @@
+# li a1,4
+# slli a2,a1,1
+# srli a3,a1,1
+# srai a4,a1,1
+#------------------------
+# li s0,20
+# li s1,80
+# slli a1,s0,2
+# beq a1,s1, label
+# j end
+# label:
+#     add s1,s1,s0
+# end:
+#------------------------
+# li s0,20
+# li s1,83
+# li s3,2
+# li s4,8
+# beq s0,s1,equal
+# bne s0,s1,L1
+# equal:
+#     add s2,s3,s4
+#     j end
+# L1:
+#     sub s0,s1,s3
+#     j end
+# end:
+# -----------------------------
+# RISC-V Program: Calculate x such that 2^x = 128
+#     # 1️⃣ Initialize variables
+#     li s0, 1          # pow = 1
+#     li s1, 0          # x = 0
+#     li t0, 128        # constant 128 for comparison
+
+# loop:
+#     # 2️⃣ Multiply pow by 2 using left shift
+#     slli s0, s0, 1    # pow = pow * 2
+
+#     # 3️⃣ Increment x
+#     addi s1, s1, 1    # x = x + 1
+
+#     # 4️⃣ Check if pow != 128
+#     bne s0, t0, loop  # if pow != 128, repeat loop
+
+# done:
+#     # 5️⃣ Exit program
+#     li a7, 10
+#     ecall
+# -----------------------------------------------
+# for loop
+# li a1,10
+# li a2,0
+# li a3,0
+
+# loop:
+# beq a1,a2 end
+# addi a3,a3,1
+# addi a2,a2,1
+# j loop
+
+# end:
+
+
+
+
+
+
+
+
+
+
+
+
