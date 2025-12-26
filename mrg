@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+#include <time.h>
+
+#define SIZE 16
+
+// 1. Standard Merge function to combine two sorted halves
+void merge(int arr[], int l, int m, int r) {
+    int n1 = m - l + 1;
+    int n2 = r - m;
+    int L[n1], R[n2];
+
+    for (int i = 0; i < n1; i++) L[i] = arr[l + i];
+    for (int j = 0; j < n2; j++) R[j] = arr[m + 1 + j];
+
+    int i = 0, j = 0, k = l;
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) arr[k++] = L[i++];
+        else arr[k++] = R[j++];
+    }
+    while (i < n1) arr[k++] = L[i++];
+    while (j < n2) arr[k++] = R[j++];
+}
+
+// 2. The "Hotspot": Parallel Merge Sort using Sections
+void parallel_mergesort(int arr[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+
+        // Creating parallel sections for the divide phase
+        #pragma omp parallel sections
+        {
+            #pragma omp section
+            parallel_mergesort(arr, l, m);
+
+            #pragma omp section
+            parallel_mergesort(arr, m + 1, r);
+        }
+        merge(arr, l, m, r);
+    }
+}
+
+int main() {
+    int arr[SIZE];
+    srand(time(NULL));
+
+    // Initialize array with random numbers
+    for (int i = 0; i < SIZE; i++) arr[i] = rand() % 100;
+
+    printf("--- Original Array ---\n");
+    for (int i = 0; i < SIZE; i++) printf("%d ", arr[i]);
+    printf("\n\n");
+
+    double start_time = omp_get_wtime();
+
+    // 3. Execution Phase: Sorting 4 segments in parallel
+    int num_segments = 4;
+    int seg_size = SIZE / num_segments;
+
+    #pragma omp parallel for ordered num_threads(4) schedule(static, 1)
+    for (int s = 0; s < num_segments; s++) {
+        int left = s * seg_size;
+        int right = left + seg_size - 1;
+
+        // Perform parallel merge sort on this segment
+        parallel_mergesort(arr, left, right);
+
+        // 4. Synchronization Phase: Ordered Output
+        #pragma omp ordered
+        {
+            printf("Segment %d (Thread %d) Sorted: ", s + 1, omp_get_thread_num());
+            for (int i = left; i <= right; i++) {
+                printf("%2d ", arr[i]);
+            }
+            printf("\n");
+        }
+    }
+
+    // Final merge of the 4 sorted segments (sequential)
+    merge(arr, 0, 3, 7);
+    merge(arr, 8, 11, 15);
+    merge(arr, 0, 7, 15);
+
+    double end_time = omp_get_wtime();
+
+    printf("\n--- Final Sorted Array ---\n");
+    for (int i = 0; i < SIZE; i++) printf("%d ", arr[i]);
+    printf("\n\nExecution Time: %f seconds\n", end_time - start_time);
+
+    return 0;
+}
